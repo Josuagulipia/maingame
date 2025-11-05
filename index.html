@@ -97,7 +97,7 @@
       position: absolute;
       top: 50%;
       transform: translate(-50%, -50%);
-      transition: left 0.4s ease-out;
+      transition: left 0.3s ease-out;
     }
 
     .target-area {
@@ -105,23 +105,34 @@
       padding: 10px;
     }
 
-    .array {
+    .search-areas {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 0 20px;
+    }
+
+    .array {
+      background: #1e293b;
+      border-radius: 10px;
+      flex: 1;
+      padding: 10px;
+      display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
+      justify-content: center;
+      gap: 8px;
     }
 
     .cell {
-      background: #1e293b;
-      padding: 12px 18px;
+      background: #334155;
+      padding: 10px 15px;
       border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
       transition: 0.2s;
     }
-    .cell:hover { background: #334155; }
+
+    .cell:hover { background: #475569; }
 
     .info {
       text-align: center;
@@ -145,6 +156,7 @@
       .rope-area { height: 120px; }
       .avatar { width: 60px; height: 60px; }
       .score { font-size: 1.5rem; }
+      .search-areas { flex-direction: column; }
     }
   </style>
 </head>
@@ -152,8 +164,12 @@
   <header>🎯 Tarik Tambang Pencarian — Siapa Cepat Dia Dapat!</header>
 
   <div class="target-area">
-    <div id="targetText">Klik angka: <span id="targetValue"></span></div>
-    <div class="array" id="arrayArea"></div>
+    <div id="targetText">Cari angka: <span id="targetValue"></span></div>
+  </div>
+
+  <div class="search-areas">
+    <div class="array" id="arrayP1"></div>
+    <div class="array" id="arrayP2"></div>
   </div>
 
   <div class="game-area">
@@ -173,16 +189,17 @@
     </div>
   </div>
 
-  <div class="info">Siapa yang lebih cepat klik angka target, dia narik talinya!</div>
+  <div class="info">💡 Siapa cepat klik angka target di sisi masing-masing, dia narik talinya!</div>
 
   <script>
-    const arrayArea = document.getElementById('arrayArea');
+    const arrayP1 = document.getElementById('arrayP1');
+    const arrayP2 = document.getElementById('arrayP2');
     const targetValue = document.getElementById('targetValue');
     const flag = document.getElementById('flag');
     const score1El = document.getElementById('score1');
     const score2El = document.getElementById('score2');
 
-    let flagPos = 50; // start tengah
+    let flagPos = 50; // mulai di tengah
     let scores = [0, 0];
     let gameActive = true;
 
@@ -191,29 +208,34 @@
     }
 
     function newRound() {
-      const arr = randomArray(20, 80);
-      const target = arr[Math.floor(Math.random() * arr.length)];
+      const arr1 = randomArray(20, 80);
+      const arr2 = randomArray(20, 80);
+      const target = Math.floor(Math.random() * 80) + 1;
       targetValue.textContent = target;
-      arrayArea.innerHTML = '';
+
+      renderArray(arrayP1, arr1, 0);
+      renderArray(arrayP2, arr2, 1);
+      gameActive = true;
+    }
+
+    function renderArray(container, arr, player) {
+      container.innerHTML = '';
       arr.forEach(num => {
         const cell = document.createElement('div');
         cell.className = 'cell';
         cell.textContent = num;
-        cell.addEventListener('click', () => checkAnswer(num));
-        arrayArea.appendChild(cell);
+        cell.addEventListener('click', () => checkAnswer(num, player));
+        container.appendChild(cell);
       });
-      gameActive = true;
     }
 
-    function checkAnswer(num) {
+    function checkAnswer(num, player) {
       if (!gameActive) return;
       const target = Number(targetValue.textContent);
       if (num === target) {
-        // Siapa yang klik lebih dulu?
-        const player = Math.random() < 0.5 ? 0 : 1; // simulasi, nanti bisa pakai deteksi per device
         addPoint(player);
+        newRound();
       }
-      newRound();
     }
 
     function addPoint(player) {
@@ -225,7 +247,7 @@
     }
 
     function moveRope(player) {
-      const move = 6;
+      const move = 5;
       if (player === 0) flagPos -= move;
       else flagPos += move;
 
