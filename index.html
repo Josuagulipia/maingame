@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search Duel - Adu Cepat Klik!</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(180deg, #b3e5fc, #e1f5fe);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .game {
+        width: 1000px;
+        max-width: 95%;
+        background: #ffffffdd;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        padding: 20px;
+      }
+      header {
+        text-align: center;
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      .info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .scores {
+        display: flex;
+        gap: 40px;
+        font-size: 20px;
+        font-weight: 600;
+      }
+      .target {
+        font-size: 20px;
+        font-weight: 600;
+      }
+      .rope-container {
+        position: relative;
+        height: 70px;
+        margin: 25px 0;
+        background: #e3f2fd;
+        border-radius: 40px;
+        overflow: hidden;
+      }
+      .rope {
+        position: absolute;
+        top: 25%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 300px;
+        height: 12px;
+        background: linear-gradient(90deg, #fdd835, #fbc02d);
+        border-radius: 5px;
+        transition: transform 0.2s ease-in-out;
+      }
+      .player {
+        position: absolute;
+        top: 10px;
+        font-size: 45px;
+      }
+      .player1 {
+        left: 5px;
+      }
+      .player2 {
+        right: 5px;
+        transform: scaleX(-1);
+      }
+      .board {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 8px;
+        margin: 20px 0;
+      }
+      .cell {
+        background: #81d4fa;
+        color: #01579b;
+        font-weight: 700;
+        font-size: 20px;
+        padding: 14px;
+        border-radius: 10px;
+        text-align: center;
+        cursor: pointer;
+        transition: transform 0.1s, background 0.3s;
+        user-select: none;
+      }
+      .cell:hover {
+        transform: scale(1.05);
+      }
+      .cell.correct {
+        background: #a5d6a7;
+        color: #1b5e20;
+      }
+      .cell.wrong {
+        background: #ef9a9a;
+        color: #b71c1c;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 10px;
+      }
+      button {
+        background: #0288d1;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 18px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #0277bd;
+      }
+      .winner {
+        text-align: center;
+        font-size: 24px;
+        font-weight: 700;
+        color: #00695c;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="game">
+      <header>⚡ Search Duel - Adu Cepat Klik!</header>
+
+      <div class="info">
+        <div class="scores">
+          <div>👤 P1: <span id="p1">0</span></div>
+          <div>👤 P2: <span id="p2">0</span></div>
+        </div>
+        <div class="target">🎯 Target: <span id="target">—</span></div>
+      </div>
+
+      <div class="rope-container">
+        <div class="player player1">💪</div>
+        <div class="player player2">💪</div>
+        <div class="rope" id="rope"></div>
+      </div>
+
+      <div class="board" id="board"></div>
+      <div class="footer">
+        <button id="startBtn">Mulai Permainan</button>
+      </div>
+      <div id="winner" class="winner"></div>
+    </div>
+
+    <script>
+      const board = document.getElementById("board");
+      const targetEl = document.getElementById("target");
+      const p1El = document.getElementById("p1");
+      const p2El = document.getElementById("p2");
+      const rope = document.getElementById("rope");
+      const winnerEl = document.getElementById("winner");
+      const startBtn = document.getElementById("startBtn");
+
+      let target = 0;
+      let scores = [0, 0];
+      let ropeShift = 0; // posisi tali relatif dari tengah
+      let gameActive = false;
+      let found = false;
+      const limit = 220; // batas kemenangan
+
+      function randomArray(n = 50, max = 150) {
+        return Array.from(
+          { length: n },
+          () => Math.floor(Math.random() * max) + 1
+        );
+      }
+
+      function startGame() {
+        scores = [0, 0];
+        ropeShift = 0;
+        gameActive = true;
+        found = false;
+        updateScores();
+        winnerEl.textContent = "";
+        targetEl.textContent = "—";
+        startBtn.disabled = true;
+        rope.style.transition = "none";
+        rope.style.transform = "translateX(-50%)"; // tengah
+        board.innerHTML = "";
+
+        setTimeout(() => {
+          rope.style.transition = "transform 0.2s ease-in-out";
+          nextRound();
+        }, 400);
+      }
+
+      function nextRound() {
+        if (!gameActive) return;
+        found = false;
+        const numbers = randomArray();
+        target = numbers[Math.floor(Math.random() * numbers.length)];
+        targetEl.textContent = target;
+        board.innerHTML = "";
+        numbers.forEach((num) => {
+          const div = document.createElement("div");
+          div.className = "cell";
+          div.textContent = num;
+          div.addEventListener("click", (e) => handleClick(e, num));
+          board.appendChild(div);
+        });
+      }
+
+      function handleClick(e, num) {
+        if (!gameActive || found) return;
+        const cell = e.target;
+        if (num === target) {
+          found = true;
+          cell.classList.add("correct");
+          // Siapa cepat klik => arah tali acak
+          const player = Math.random() < 0.5 ? 0 : 1;
+          scores[player] += 10;
+          updateScores();
+          moveRope(player === 0 ? -30 : 30);
+          playSound("correct");
+          setTimeout(() => {
+            if (checkWinner()) return;
+            nextRound();
+          }, 600);
+        } else {
+          cell.classList.add("wrong");
+          playSound("wrong");
+        }
+      }
+
+      function updateScores() {
+        p1El.textContent = scores[0];
+        p2El.textContent = scores[1];
+      }
+
+      function moveRope(delta) {
+        ropeShift += delta;
+        ropeShift = Math.max(Math.min(ropeShift, limit), -limit);
+        rope.style.transform = `translate(calc(-50% + ${ropeShift}px))`;
+      }
+
+      function checkWinner() {
+        if (ropeShift <= -limit) {
+          endGame("🏆 Pemenang: Player 1!");
+          return true;
+        } else if (ropeShift >= limit) {
+          endGame("🏆 Pemenang: Player 2!");
+          return true;
+        }
+        return false;
+      }
+
+      function endGame(message) {
+        gameActive = false;
+        targetEl.textContent = "—";
+        board.innerHTML = "";
+        winnerEl.textContent = message;
+        startBtn.disabled = false;
+      }
+
+      function playSound(type) {
+        const audio = new Audio(
+          type === "correct"
+            ? "https://cdn.pixabay.com/download/audio/2022/03/15/audio_9d15b9ad4b.mp3?filename=correct-2-46134.mp3"
+            : "https://cdn.pixabay.com/download/audio/2022/03/15/audio_958b0ffbc4.mp3?filename=error-126627.mp3"
+        );
+        audio.play();
+      }
+
+      startBtn.addEventListener("click", startGame);
+    </script>
+  </body>
+</html>
