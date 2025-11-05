@@ -14,9 +14,14 @@
     --cell-hover: #333;
   }
   * { box-sizing: border-box; font-family: 'Press Start 2P', monospace; }
-  body { margin:0; background: var(--bg); color: var(--text); display:flex; flex-direction:column; height:100vh; }
-  header { text-align:center; padding:10px; font-size:1.2em; border-bottom:2px solid var(--text); }
-  .game-area { flex:1; display:flex; flex-direction:row; align-items:center; justify-content:space-between; padding:10px; position:relative; overflow:hidden; }
+  body { margin:0; background: var(--bg); color: var(--text); display:flex; flex-direction:column; height:100vh; align-items:center; justify-content:flex-start; }
+  header { text-align:center; padding:10px; font-size:1.2em; border-bottom:2px solid var(--text); width:100%; }
+  .target-area { text-align:center; padding:10px; font-size:1.5em; margin-top:10px; }
+  .choices { display:flex; justify-content:space-between; padding:10px 30px; width:100%; max-width:1200px; }
+  .choice-column { width:45%; background:#111; border-radius:10px; padding:10px; display:flex; flex-wrap:wrap; justify-content:center; gap:8px; min-height:200px; }
+  .cell { background: var(--cell-bg); padding:10px 15px; border-radius:8px; cursor:pointer; font-weight:bold; transition:0.2s; color:#fff; }
+  .cell:hover { background: var(--cell-hover); }
+  .game-area { flex:1; display:flex; flex-direction:row; align-items:center; justify-content:space-between; padding:10px; position:relative; overflow:hidden; width:100%; max-width:1200px; }
   .player { width:30%; display:flex; flex-direction:column; align-items:center; }
   .avatar { width:80px; height:80px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:700; color:#fff; margin-bottom:8px; }
   #p1 .avatar{background:var(--p1);} #p2 .avatar{background:var(--p2);}
@@ -24,12 +29,8 @@
   .rope-area { flex:1; position:relative; height:200px; display:flex; align-items:center; justify-content:center; }
   .rope { width:100%; height:10px; background:linear-gradient(to right, var(--p1), var(--p2)); border-radius:5px; position:absolute; left:0; top:50%; transform:translateY(-50%); }
   .flag { width:30px; height:30px; background:yellow; border-radius:50%; position:absolute; top:50%; transform:translate(-50%,-50%); transition:left 0.3s ease-out; }
-  .target-area { text-align:center; padding:10px; font-size:1.2em; }
-  .choices { display:flex; justify-content:space-between; padding:10px 30px; }
-  .choice-column { width:45%; background:#111; border-radius:10px; padding:10px; display:flex; flex-wrap:wrap; justify-content:center; gap:8px; }
-  .cell { background: var(--cell-bg); padding:10px 15px; border-radius:8px; cursor:pointer; font-weight:bold; transition:0.2s; color:#fff; }
-  .cell:hover { background: var(--cell-hover); }
   .info { text-align:center; margin-top:6px; font-size:1.1em; color:#94a3b8; }
+  .center-btn { margin:20px auto; padding:12px 20px; font-size:1.2em; background:#22c55e; border:none; border-radius:10px; color:#fff; cursor:pointer; font-weight:bold; }
   @media(max-width:768px){
     .game-area{flex-direction:column; gap:20px;}
     .player{width:100%; flex-direction:row; justify-content:space-around;}
@@ -44,16 +45,18 @@
 <body>
 <header>🎮 Tarik Tambang Arcade — Pencarian Cepat!</header>
 
-<div class="target-area">
+<button class="center-btn" id="startBtn">Mulai Game</button>
+
+<div class="target-area" id="targetArea" style="display:none">
   Cari angka: <span id="targetValue"></span>
 </div>
 
-<div class="choices">
+<div class="choices" style="display:none">
   <div class="choice-column" id="choicesP1"></div>
   <div class="choice-column" id="choicesP2"></div>
 </div>
 
-<div class="game-area">
+<div class="game-area" style="display:none">
   <div class="player" id="p1">
     <div class="avatar">P1</div>
     <div class="score" id="score1">0</div>
@@ -73,18 +76,49 @@
 <div class="info">💡 Klik angka target di area kamu secepatnya! Talinya bergerak ke arahmu.</div>
 
 <script>
+const startBtn = document.getElementById('startBtn');
 const targetValue = document.getElementById('targetValue');
+const targetArea = document.getElementById('targetArea');
 const choicesP1 = document.getElementById('choicesP1');
 const choicesP2 = document.getElementById('choicesP2');
+const gameArea = document.querySelector('.game-area');
 const flag = document.getElementById('flag');
 const score1El = document.getElementById('score1');
 const score2El = document.getElementById('score2');
 
 let flagPos = 50; // mulai tengah
 let scores = [0,0];
-let gameActive = true;
-
+let gameActive = false;
 const totalNumbers = 30;
+
+startBtn.addEventListener('click', ()=>{
+  startBtn.disabled=true;
+  startCountdown(3);
+});
+
+function startCountdown(sec){
+  targetArea.style.display='block';
+  targetArea.textContent = `Mulai dalam ${sec}...`;
+  let counter = sec;
+  const interval = setInterval(()=>{
+    counter--;
+    if(counter>0){
+      targetArea.textContent = `Mulai dalam ${counter}...`;
+    } else {
+      clearInterval(interval);
+      targetArea.textContent = '';
+      startGame();
+    }
+  },1000);
+}
+
+function startGame(){
+  targetArea.style.display='block';
+  document.querySelector('.choices').style.display='flex';
+  gameArea.style.display='flex';
+  gameActive=true;
+  newRound();
+}
 
 function newRound(){
   const numbers = Array.from({length:totalNumbers}, (_,i)=>i+1);
@@ -92,7 +126,6 @@ function newRound(){
   targetValue.textContent = target;
   renderChoices(choicesP1, numbers, 0);
   renderChoices(choicesP2, numbers, 1);
-  gameActive=true;
 }
 
 function renderChoices(container, arr, player){
@@ -147,10 +180,11 @@ function resetGame(){
   scores=[0,0];
   score1El.textContent=0;
   score2El.textContent=0;
-  newRound();
+  startBtn.disabled=false;
+  targetArea.style.display='none';
+  document.querySelector('.choices').style.display='none';
+  gameArea.style.display='none';
 }
-
-newRound();
 </script>
 </body>
 </html>
