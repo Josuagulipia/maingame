@@ -1,278 +1,333 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Search Duel - Adu Cepat Klik!</title>
-    <style>
-      body {
-        margin: 0;
-        font-family: "Poppins", sans-serif;
-        background: linear-gradient(180deg, #b3e5fc, #e1f5fe);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-      }
-      .game {
-        width: 1000px;
-        max-width: 95%;
-        background: #ffffffdd;
-        border-radius: 16px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        padding: 20px;
-      }
-      header {
-        text-align: center;
-        font-size: 28px;
-        font-weight: 700;
-        margin-bottom: 10px;
-      }
-      .info {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .scores {
-        display: flex;
-        gap: 40px;
-        font-size: 20px;
-        font-weight: 600;
-      }
-      .target {
-        font-size: 20px;
-        font-weight: 600;
-      }
-      .rope-container {
-        position: relative;
-        height: 70px;
-        margin: 25px 0;
-        background: #e3f2fd;
-        border-radius: 40px;
-        overflow: hidden;
-      }
-      .rope {
-        position: absolute;
-        top: 25%;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 300px;
-        height: 12px;
-        background: linear-gradient(90deg, #fdd835, #fbc02d);
-        border-radius: 5px;
-        transition: transform 0.2s ease-in-out;
-      }
-      .player {
-        position: absolute;
-        top: 10px;
-        font-size: 45px;
-      }
-      .player1 {
-        left: 5px;
-      }
-      .player2 {
-        right: 5px;
-        transform: scaleX(-1);
-      }
-      .board {
-        display: grid;
-        grid-template-columns: repeat(10, 1fr);
-        gap: 8px;
-        margin: 20px 0;
-      }
-      .cell {
-        background: #81d4fa;
-        color: #01579b;
-        font-weight: 700;
-        font-size: 20px;
-        padding: 14px;
-        border-radius: 10px;
-        text-align: center;
-        cursor: pointer;
-        transition: transform 0.1s, background 0.3s;
-        user-select: none;
-      }
-      .cell:hover {
-        transform: scale(1.05);
-      }
-      .cell.correct {
-        background: #a5d6a7;
-        color: #1b5e20;
-      }
-      .cell.wrong {
-        background: #ef9a9a;
-        color: #b71c1c;
-      }
-      .footer {
-        text-align: center;
-        margin-top: 10px;
-      }
-      button {
-        background: #0288d1;
-        color: white;
-        border: none;
-        border-radius: 10px;
-        padding: 10px 18px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      button:hover {
-        background: #0277bd;
-      }
-      .winner {
-        text-align: center;
-        font-size: 24px;
-        font-weight: 700;
-        color: #00695c;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="game">
-      <header>⚡ Search Duel - Adu Cepat Klik!</header>
-
-      <div class="info">
-        <div class="scores">
-          <div>👤 P1: <span id="p1">0</span></div>
-          <div>👤 P2: <span id="p2">0</span></div>
-        </div>
-        <div class="target">🎯 Target: <span id="target">—</span></div>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Search Duel — Classic Arcade (Tarik Tambang)</title>
+<style>
+  :root{
+    --bg-left:#0b3d91;   /* biru P1 */
+    --bg-right:#8b0000;  /* merah P2 */
+    --panel-bg:#0b1220;
+    --rope:#ffd54f;
+    --cell-bg:#ffd54f;
+    --text-light:#f8fafc;
+    --accent:#ffd54f;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:#071022;color:var(--text-light)}
+  /* layout two halves */
+  .wrap{display:flex;height:100vh;overflow:hidden}
+  .half{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;position:relative;
+    transition:background 0.25s;
+  }
+  .left{background:linear-gradient(180deg,var(--bg-left),#052a66);}
+  .right{background:linear-gradient(180deg,var(--bg-right),#4b0000);}
+  /* top status in each half */
+  .player-box{width:100%;max-width:420px;text-align:center;padding:12px;border-radius:10px;background:rgba(0,0,0,0.18);box-shadow:inset 0 -4px 20px rgba(0,0,0,0.25)}
+  .player-title{font-weight:800;font-size:20px;letter-spacing:1px}
+  .score{font-size:36px;font-weight:900;margin-top:6px}
+  .small{font-size:13px;color:rgba(255,255,255,0.75)}
+  /* center overlay (board & rope) */
+  .center{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:86%;max-width:1100px;pointer-events:none;
+    display:flex;flex-direction:column;align-items:center;gap:18px;
+  }
+  .target-card{pointer-events:auto;background:rgba(3,10,25,0.9);padding:10px 16px;border-radius:12px;border:2px solid rgba(255,213,79,0.12);color:var(--accent);font-weight:700}
+  .rope-area{position:relative;width:100%;height:80px;background:rgba(255,255,255,0.02);border-radius:40px;overflow:hidden;pointer-events:none}
+  .rope{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:420px;height:18px;border-radius:12px;
+    background:linear-gradient(90deg,#f6c85f,#ffd54f);box-shadow:0 6px 18px rgba(0,0,0,0.45);
+    transition:transform 0.15s cubic-bezier(.2,.9,.2,1);
+  }
+  .rope-knot{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;
+    background:#333;color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:900;pointer-events:none}
+  /* board of many cells */
+  .board{pointer-events:auto;display:grid;grid-template-columns:repeat(12,1fr);gap:8px;width:100%;max-width:1100px}
+  .cell{
+    background:var(--cell-bg);color:#061022;font-weight:900;border-radius:8px;padding:12px 6px;text-align:center;
+    font-size:18px;cursor:pointer;user-select:none;box-shadow:0 4px 8px rgba(2,6,23,.35);
+    transition:transform .08s,filter .18s,opacity .25s;
+  }
+  .cell:active{transform:scale(.98)}
+  .cell.correct{background:#9be7a1}
+  .cell.wrong{background:#ff9b9b;opacity:.75}
+  /* overlays */
+  .controls{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:12px;z-index:40}
+  button.btn{
+    background:#061122;color:var(--accent);border:2px solid rgba(255,213,79,.12);padding:10px 14px;border-radius:10px;font-weight:800;cursor:pointer
+  }
+  .hud{position:absolute;top:14px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.85);font-weight:700}
+  /* winner overlay */
+  .winner-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:linear-gradient(90deg,rgba(0,0,0,0.55),rgba(0,0,0,0.7));z-index:60}
+  .winner-card{background:#071022;color:var(--accent);padding:30px;border-radius:14px;border:2px solid rgba(255,213,79,.18);text-align:center;min-width:320px}
+  .winner-card h1{margin:0 0 6px 0;font-size:30px}
+  /* responsive */
+  @media (max-width:900px){
+    .board{grid-template-columns:repeat(8,1fr)}
+    .cell{font-size:16px;padding:10px 6px}
+    .center{width:94%}
+  }
+  @media (max-width:600px){
+    .wrap{flex-direction:column}
+    .half{height:50vh}
+    .center{position:static;transform:none;margin-top:-60px}
+    .board{grid-template-columns:repeat(6,1fr)}
+    .rope-area{height:60px}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap" id="stage">
+    <div class="half left" aria-label="player1-area">
+      <div class="player-box">
+        <div class="player-title">PLAYER 1</div>
+        <div class="score" id="score1">0</div>
+        <div class="small">Klik sisi kiri layar untuk klaim poin</div>
       </div>
-
-      <div class="rope-container">
-        <div class="player player1">💪</div>
-        <div class="player player2">💪</div>
-        <div class="rope" id="rope"></div>
-      </div>
-
-      <div class="board" id="board"></div>
-      <div class="footer">
-        <button id="startBtn">Mulai Permainan</button>
-      </div>
-      <div id="winner" class="winner"></div>
     </div>
 
-    <script>
-      const board = document.getElementById("board");
-      const targetEl = document.getElementById("target");
-      const p1El = document.getElementById("p1");
-      const p2El = document.getElementById("p2");
-      const rope = document.getElementById("rope");
-      const winnerEl = document.getElementById("winner");
-      const startBtn = document.getElementById("startBtn");
+    <div class="half right" aria-label="player2-area">
+      <div class="player-box">
+        <div class="player-title">PLAYER 2</div>
+        <div class="score" id="score2">0</div>
+        <div class="small">Klik sisi kanan layar untuk klaim poin</div>
+      </div>
+    </div>
 
-      let target = 0;
-      let scores = [0, 0];
-      let ropeShift = 0; // posisi tali relatif dari tengah
-      let gameActive = false;
-      let found = false;
-      const limit = 220; // batas kemenangan
+    <!-- Center overlay: target, rope, board (pointer-events enabled only on board/cells) -->
+    <div class="center" id="center">
+      <div class="target-card" id="targetCard">Target: —</div>
 
-      function randomArray(n = 50, max = 150) {
-        return Array.from(
-          { length: n },
-          () => Math.floor(Math.random() * max) + 1
-        );
-      }
+      <div class="rope-area" aria-hidden="true">
+        <div class="rope" id="rope"></div>
+        <div class="rope-knot" id="knot">⚫</div>
+      </div>
 
-      function startGame() {
-        scores = [0, 0];
-        ropeShift = 0;
-        gameActive = true;
-        found = false;
-        updateScores();
-        winnerEl.textContent = "";
-        targetEl.textContent = "—";
-        startBtn.disabled = true;
-        rope.style.transition = "none";
-        rope.style.transform = "translateX(-50%)"; // tengah
-        board.innerHTML = "";
+      <div class="board" id="board" aria-live="polite" aria-label="board"></div>
+    </div>
+  </div>
 
-        setTimeout(() => {
-          rope.style.transition = "transform 0.2s ease-in-out";
-          nextRound();
-        }, 400);
-      }
+  <div class="controls">
+    <button class="btn" id="startBtn">MULAI</button>
+    <button class="btn" id="resetBtn">RESET</button>
+    <div style="width:10px"></div>
+    <label style="color:var(--text-light);font-weight:800;align-self:center">Mode: </label>
+    <select id="modeSel" style="font-weight:800;padding:8px;border-radius:8px;background:#061122;color:var(--accent);border:2px solid rgba(255,213,79,.12)">
+      <option value="numbers">Angka</option>
+      <option value="letters">Huruf</option>
+      <option value="emoji">Emoji</option>
+    </select>
+  </div>
 
-      function nextRound() {
-        if (!gameActive) return;
-        found = false;
-        const numbers = randomArray();
-        target = numbers[Math.floor(Math.random() * numbers.length)];
-        targetEl.textContent = target;
-        board.innerHTML = "";
-        numbers.forEach((num) => {
-          const div = document.createElement("div");
-          div.className = "cell";
-          div.textContent = num;
-          div.addEventListener("click", (e) => handleClick(e, num));
-          board.appendChild(div);
-        });
-      }
+  <div class="winner-overlay" id="winnerO">
+    <div class="winner-card">
+      <h1 id="winnerText">Pemenang!</h1>
+      <p id="winnerSub" style="opacity:.85;margin:6px 0 12px 0">Permainan selesai. Tekan MULAI untuk ulang.</p>
+      <button class="btn" id="closeWinner">TUTUP</button>
+    </div>
+  </div>
 
-      function handleClick(e, num) {
-        if (!gameActive || found) return;
-        const cell = e.target;
-        if (num === target) {
-          found = true;
-          cell.classList.add("correct");
-          // Siapa cepat klik => arah tali acak
-          const player = Math.random() < 0.5 ? 0 : 1;
-          scores[player] += 10;
-          updateScores();
-          moveRope(player === 0 ? -30 : 30);
-          playSound("correct");
-          setTimeout(() => {
-            if (checkWinner()) return;
-            nextRound();
-          }, 600);
-        } else {
-          cell.classList.add("wrong");
-          playSound("wrong");
-        }
-      }
+<script>
+/* Game logic:
+ - Many cells shown in center board.
+ - Target is chosen from one of the cells.
+ - When a cell is tapped/clicked, we detect clientX: left half => P1, right half => P2.
+ - If the clicked cell value === target and the first valid tap for that round, that player gets score.
+ - Rope starts exactly centered every start; rope moves quickly (0.12s).
+ - Winner when rope reaches threshold (touches side).
+*/
 
-      function updateScores() {
-        p1El.textContent = scores[0];
-        p2El.textContent = scores[1];
-      }
+// DOM
+const boardEl = document.getElementById('board');
+const targetCard = document.getElementById('targetCard');
+const rope = document.getElementById('rope');
+const knot = document.getElementById('knot');
+const score1El = document.getElementById('score1');
+const score2El = document.getElementById('score2');
+const startBtn = document.getElementById('startBtn');
+const resetBtn = document.getElementById('resetBtn');
+const winnerO = document.getElementById('winnerO');
+const winnerText = document.getElementById('winnerText');
+const closeWinner = document.getElementById('closeWinner');
+const modeSel = document.getElementById('modeSel');
 
-      function moveRope(delta) {
-        ropeShift += delta;
-        ropeShift = Math.max(Math.min(ropeShift, limit), -limit);
-        rope.style.transform = `translate(calc(-50% + ${ropeShift}px))`;
-      }
+let scores = [0,0];
+let ropePx = 0;       // pixels shift from center (positive => right, negative => left)
+let active = false;
+let roundLocked = false; // prevent multiple claims same round
+const WIN_LIMIT = 240; // threshold in px (tweakable)
+const CELL_COUNT = 60; // many elements to make searching hard
 
-      function checkWinner() {
-        if (ropeShift <= -limit) {
-          endGame("🏆 Pemenang: Player 1!");
-          return true;
-        } else if (ropeShift >= limit) {
-          endGame("🏆 Pemenang: Player 2!");
-          return true;
-        }
-        return false;
-      }
+// content pools
+const poolNumbers = () => Array.from({length:CELL_COUNT}, ()=> Math.floor(Math.random()*200)+1);
+const poolLetters = () => {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  return Array.from({length:CELL_COUNT}, ()=> letters[Math.floor(Math.random()*letters.length)]);
+};
+const poolEmoji = () => {
+  const emojis = ['🍎','🍌','🍇','🍓','🍒','🍍','🥝','🍉','🍑','🍋','🍊','🥥','🍐','🍈','🍅','🌶️','🥕','🥦','🥑','🍄','🥔','🍞','🥐','🍪','🍩','🍰','🍫','🍿','🍷','☕','🧃','🥤'];
+  return Array.from({length:CELL_COUNT}, ()=> emojis[Math.floor(Math.random()*emojis.length)]);
+};
 
-      function endGame(message) {
-        gameActive = false;
-        targetEl.textContent = "—";
-        board.innerHTML = "";
-        winnerEl.textContent = message;
-        startBtn.disabled = false;
-      }
+function makeBoard(){
+  boardEl.innerHTML = '';
+  const mode = modeSel.value;
+  let items = (mode === 'letters' ? poolLetters() : (mode === 'emoji' ? poolEmoji() : poolNumbers()));
+  // ensure unique-ish by shuffling occasionally
+  items = shuffle(items);
+  items.forEach((val,i)=>{
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.textContent = val;
+    cell.dataset.val = String(val);
+    // attach listener
+    cell.addEventListener('pointerdown', handleCellClick); // pointerdown for better touch responsiveness
+    boardEl.appendChild(cell);
+  });
+  // pick target
+  const allVals = Array.from(boardEl.querySelectorAll('.cell')).map(c=>c.dataset.val);
+  const target = allVals[Math.floor(Math.random()*allVals.length)];
+  targetCard.textContent = 'Target: ' + target;
+  targetCard.dataset.value = target;
+  roundLocked = false;
+}
 
-      function playSound(type) {
-        const audio = new Audio(
-          type === "correct"
-            ? "https://cdn.pixabay.com/download/audio/2022/03/15/audio_9d15b9ad4b.mp3?filename=correct-2-46134.mp3"
-            : "https://cdn.pixabay.com/download/audio/2022/03/15/audio_958b0ffbc4.mp3?filename=error-126627.mp3"
-        );
-        audio.play();
-      }
+function handleCellClick(e){
+  if(!active || roundLocked) return;
+  const el = e.currentTarget;
+  const val = el.dataset.val;
+  const target = targetCard.dataset.value;
+  // determine which side clicked by clientX
+  const clientX = (e.clientX !== 0) ? e.clientX : (e.touches ? e.touches[0].clientX : null);
+  const mid = window.innerWidth / 2;
+  const player = (clientX !== null && clientX > mid) ? 1 : 0; // 0 => P1 (left), 1 => P2 (right)
+  if(val === target){
+    // correct: award to that player
+    roundLocked = true;
+    markCorrect(el);
+    awardPoint(player);
+  } else {
+    // wrong click: short feedback (no penalty)
+    markWrong(el);
+  }
+}
 
-      startBtn.addEventListener("click", startGame);
-    </script>
-  </body>
+function markCorrect(el){
+  el.classList.add('correct');
+  // small pulse then fade
+  setTimeout(()=>{ el.style.opacity = '0.6'; }, 220);
+}
+function markWrong(el){
+  el.classList.add('wrong');
+  setTimeout(()=>{ el.classList.remove('wrong'); }, 400);
+}
+
+function awardPoint(player){
+  // increase score, move rope quickly, then next round after short delay
+  scores[player] += 10;
+  renderScores();
+  // move rope: left player => negative shift; right => positive
+  const delta = (player === 0) ? -40 : 40;
+  moveRope(delta, 0.12);
+  playSfx('correct');
+  setTimeout(()=>{
+    if(checkWinner()) return;
+    // regenerate board for next round
+    makeBoard();
+  }, 320);
+}
+
+function moveRope(deltaPx, dur=0.15){
+  ropePx += deltaPx;
+  // clamp
+  if(ropePx > WIN_LIMIT) ropePx = WIN_LIMIT;
+  if(ropePx < -WIN_LIMIT) ropePx = -WIN_LIMIT;
+  // apply transform using calc so -50% center remains baseline
+  rope.style.transition = `transform ${dur}s cubic-bezier(.15,.9,.15,1)`;
+  rope.style.transform = `translate(calc(-50% + ${ropePx}px))`;
+  knot.style.transition = rope.style.transition;
+  knot.style.transform = `translate(calc(-50% + ${ropePx}px))`;
+}
+
+function resetRopeInstant(){
+  ropePx = 0;
+  rope.style.transition = 'none';
+  rope.style.transform = 'translate(-50%)';
+  knot.style.transition = 'none';
+  knot.style.transform = 'translate(-50%)';
+}
+
+function checkWinner(){
+  if(ropePx <= -WIN_LIMIT){
+    showWinner(1); // p1
+    return true;
+  } else if(ropePx >= WIN_LIMIT){
+    showWinner(2); // p2
+    return true;
+  }
+  return false;
+}
+
+function showWinner(num){
+  active = false;
+  winnerText.textContent = (num===1) ? 'PLAYER 1 MENANG!' : 'PLAYER 2 MENANG!';
+  winnerO.style.display = 'flex';
+  playSfx('win');
+}
+
+function renderScores(){
+  score1El.textContent = scores[0];
+  score2El.textContent = scores[1];
+}
+
+function startGame(){
+  scores = [0,0];
+  renderScores();
+  winnerO.style.display = 'none';
+  resetRopeInstant();
+  active = true;
+  // slight delay to give the eye time - then enable board
+  setTimeout(()=>{ makeBoard(); }, 300);
+}
+
+// utilities
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+// sound effects (small beeps using WebAudio)
+let audioCtx = null;
+function playSfx(kind){
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    if(kind==='correct'){ o.frequency.value = 880; g.gain.value = 0.08; o.type='sine'; }
+    else if(kind==='win'){ o.frequency.value = 440; g.gain.value = 0.15; o.type='sawtooth'; }
+    o.start(0);
+    setTimeout(()=>{ o.stop(); }, kind==='win' ? 300 : 140);
+  }catch(e){ /* ignore audio errors */ }
+}
+
+// reset and controls
+startBtn.addEventListener('click', ()=>{ startGame(); startBtn.blur(); });
+resetBtn.addEventListener('click', ()=>{ scores=[0,0]; renderScores(); resetRopeInstant(); makeBoard(); active=false; winnerO.style.display='none'; });
+
+// close winner overlay
+closeWinner.addEventListener('click', ()=>{ winnerO.style.display='none'; });
+
+// init board but inactive until start
+resetRopeInstant();
+makeBoard();
+renderScores();
+
+</script>
+</body>
 </html>
