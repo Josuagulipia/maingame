@@ -103,19 +103,19 @@
     .target-area {
       text-align: center;
       padding: 10px;
+      font-size: 1.2em;
     }
 
-    .search-areas {
+    .choices {
       display: flex;
       justify-content: space-between;
-      gap: 20px;
-      padding: 0 20px;
+      padding: 10px 30px;
     }
 
-    .array {
+    .choice-column {
+      width: 45%;
       background: #1e293b;
       border-radius: 10px;
-      flex: 1;
       padding: 10px;
       display: flex;
       flex-wrap: wrap;
@@ -156,7 +156,12 @@
       .rope-area { height: 120px; }
       .avatar { width: 60px; height: 60px; }
       .score { font-size: 1.5rem; }
-      .search-areas { flex-direction: column; }
+      .choices {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+      .choice-column { width: 90%; }
     }
   </style>
 </head>
@@ -164,12 +169,12 @@
   <header>🎯 Tarik Tambang Pencarian — Siapa Cepat Dia Dapat!</header>
 
   <div class="target-area">
-    <div id="targetText">Cari angka: <span id="targetValue"></span></div>
+    Cari angka: <span id="targetValue"></span>
   </div>
 
-  <div class="search-areas">
-    <div class="array" id="arrayP1"></div>
-    <div class="array" id="arrayP2"></div>
+  <div class="choices">
+    <div class="choice-column" id="choicesP1"></div>
+    <div class="choice-column" id="choicesP2"></div>
   </div>
 
   <div class="game-area">
@@ -192,14 +197,14 @@
   <div class="info">💡 Siapa cepat klik angka target di sisi masing-masing, dia narik talinya!</div>
 
   <script>
-    const arrayP1 = document.getElementById('arrayP1');
-    const arrayP2 = document.getElementById('arrayP2');
     const targetValue = document.getElementById('targetValue');
+    const choicesP1 = document.getElementById('choicesP1');
+    const choicesP2 = document.getElementById('choicesP2');
     const flag = document.getElementById('flag');
     const score1El = document.getElementById('score1');
     const score2El = document.getElementById('score2');
 
-    let flagPos = 50; // mulai di tengah
+    let flagPos = 50; // mulai tengah
     let scores = [0, 0];
     let gameActive = true;
 
@@ -208,17 +213,17 @@
     }
 
     function newRound() {
-      const arr1 = randomArray(20, 80);
-      const arr2 = randomArray(20, 80);
+      const arr1 = randomArray(15, 80);
+      const arr2 = randomArray(15, 80);
       const target = Math.floor(Math.random() * 80) + 1;
       targetValue.textContent = target;
 
-      renderArray(arrayP1, arr1, 0);
-      renderArray(arrayP2, arr2, 1);
+      renderChoices(choicesP1, arr1, 0);
+      renderChoices(choicesP2, arr2, 1);
       gameActive = true;
     }
 
-    function renderArray(container, arr, player) {
+    function renderChoices(container, arr, player) {
       container.innerHTML = '';
       arr.forEach(num => {
         const cell = document.createElement('div');
