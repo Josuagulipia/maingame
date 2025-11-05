@@ -5,58 +5,60 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Tarik Tambang Arcade 🎮</title>
 <style>
-  :root {
-    --p1: #ef4444;
-    --p2: #3b82f6;
-    --bg: #000;
-    --text: #fff;
-    --cell-bg: #111;
-    --cell-hover: #333;
-  }
-  * { box-sizing: border-box; font-family: 'Press Start 2P', monospace; }
-  body { margin:0; background: var(--bg); color: var(--text); display:flex; flex-direction:column; height:100vh; align-items:center; justify-content:flex-start; }
-  header { text-align:center; padding:10px; font-size:1.2em; border-bottom:2px solid var(--text); width:100%; }
-  .target-area { text-align:center; padding:10px; font-size:1.5em; margin-top:10px; }
-  .choices { display:flex; justify-content:space-between; padding:10px 30px; width:100%; max-width:1200px; }
-  .choice-column { width:45%; background:#111; border-radius:10px; padding:10px; display:flex; flex-wrap:wrap; justify-content:center; gap:8px; min-height:200px; }
-  .cell { background: var(--cell-bg); padding:10px 15px; border-radius:8px; cursor:pointer; font-weight:bold; transition:0.2s; color:#fff; }
-  .cell:hover { background: var(--cell-hover); }
-  .game-area { flex:1; display:flex; flex-direction:row; align-items:center; justify-content:space-between; padding:10px; position:relative; overflow:hidden; width:100%; max-width:1200px; }
-  .player { width:30%; display:flex; flex-direction:column; align-items:center; }
-  .avatar { width:80px; height:80px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:700; color:#fff; margin-bottom:8px; }
-  #p1 .avatar{background:var(--p1);} #p2 .avatar{background:var(--p2);}
-  .score { font-size:2rem; font-weight:700; }
-  .rope-area { flex:1; position:relative; height:200px; display:flex; align-items:center; justify-content:center; }
-  .rope { width:100%; height:10px; background:linear-gradient(to right, var(--p1), var(--p2)); border-radius:5px; position:absolute; left:0; top:50%; transform:translateY(-50%); }
-  .flag { width:30px; height:30px; background:yellow; border-radius:50%; position:absolute; top:50%; transform:translate(-50%,-50%); transition:left 0.3s ease-out; }
-  .info { text-align:center; margin-top:6px; font-size:1.1em; color:#94a3b8; }
-  .center-btn { margin:20px auto; padding:12px 20px; font-size:1.2em; background:#22c55e; border:none; border-radius:10px; color:#fff; cursor:pointer; font-weight:bold; }
-  @media(max-width:768px){
-    .game-area{flex-direction:column; gap:20px;}
-    .player{width:100%; flex-direction:row; justify-content:space-around;}
-    .rope-area{height:120px;}
-    .avatar{width:60px;height:60px;}
-    .score{font-size:1.5rem;}
-    .choices{flex-direction:column; align-items:center; gap:20px;}
-    .choice-column{width:90%;}
-  }
+:root {
+  --p1: #ef4444;
+  --p2: #3b82f6;
+  --bg: #000;
+  --text: #fff;
+  --cell-bg: #111;
+  --cell-hover: #333;
+}
+* { box-sizing: border-box; font-family: 'Press Start 2P', monospace; }
+body { margin:0; background: var(--bg); color: var(--text); display:flex; flex-direction:column; height:100vh; align-items:center; justify-content:flex-start; }
+header { text-align:center; padding:10px; font-size:1.2em; border-bottom:2px solid var(--text); width:100%; }
+.center-btn { margin:20px auto; padding:12px 20px; font-size:1.2em; background:#22c55e; border:none; border-radius:10px; color:#fff; cursor:pointer; font-weight:bold; }
+#countdown { font-size:3rem; text-align:center; margin:20px; display:none; }
+.target-area { text-align:center; padding:10px; font-size:1.5em; margin-top:10px; display:none; }
+.choices { display:flex; justify-content:space-between; padding:10px 30px; width:100%; max-width:1200px; display:none; }
+.choice-column { width:45%; background:#111; border-radius:10px; padding:10px; display:flex; flex-wrap:wrap; justify-content:center; gap:8px; min-height:200px; }
+.cell { background: var(--cell-bg); padding:10px 15px; border-radius:8px; cursor:pointer; font-weight:bold; transition:0.2s; color:#fff; }
+.cell:hover { background: var(--cell-hover); }
+.game-area { flex:1; display:flex; flex-direction:row; align-items:center; justify-content:space-between; padding:10px; position:relative; overflow:hidden; width:100%; max-width:1200px; display:none; }
+.player { width:30%; display:flex; flex-direction:column; align-items:center; }
+.avatar { width:80px; height:80px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:700; color:#fff; margin-bottom:8px; }
+#p1 .avatar{background:var(--p1);} #p2 .avatar{background:var(--p2);}
+.score { font-size:2rem; font-weight:700; }
+.rope-area { flex:1; position:relative; height:200px; display:flex; align-items:center; justify-content:center; }
+.rope { width:100%; height:10px; background:linear-gradient(to right, var(--p1), var(--p2)); border-radius:5px; position:absolute; left:0; top:50%; transform:translateY(-50%); }
+.flag { width:30px; height:30px; background:yellow; border-radius:50%; position:absolute; top:50%; transform:translate(-50%,-50%); transition:left 0.3s ease-out; }
+.info { text-align:center; margin-top:6px; font-size:1.1em; color:#94a3b8; }
+@media(max-width:768px){
+  .game-area{flex-direction:column; gap:20px;}
+  .player{width:100%; flex-direction:row; justify-content:space-around;}
+  .rope-area{height:120px;}
+  .avatar{width:60px;height:60px;}
+  .score{font-size:1.5rem;}
+  .choices{flex-direction:column; align-items:center; gap:20px;}
+  .choice-column{width:90%;}
+}
 </style>
 </head>
 <body>
 <header>🎮 Tarik Tambang Arcade — Pencarian Cepat!</header>
 
 <button class="center-btn" id="startBtn">Mulai Game</button>
+<div id="countdown"></div>
 
-<div class="target-area" id="targetArea" style="display:none">
+<div class="target-area" id="targetArea">
   Cari angka: <span id="targetValue"></span>
 </div>
 
-<div class="choices" style="display:none">
+<div class="choices">
   <div class="choice-column" id="choicesP1"></div>
   <div class="choice-column" id="choicesP2"></div>
 </div>
 
-<div class="game-area" style="display:none">
+<div class="game-area">
   <div class="player" id="p1">
     <div class="avatar">P1</div>
     <div class="score" id="score1">0</div>
@@ -77,6 +79,7 @@
 
 <script>
 const startBtn = document.getElementById('startBtn');
+const countdownEl = document.getElementById('countdown');
 const targetValue = document.getElementById('targetValue');
 const targetArea = document.getElementById('targetArea');
 const choicesP1 = document.getElementById('choicesP1');
@@ -86,28 +89,28 @@ const flag = document.getElementById('flag');
 const score1El = document.getElementById('score1');
 const score2El = document.getElementById('score2');
 
-let flagPos = 50; // mulai tengah
+let flagPos = 50;
 let scores = [0,0];
 let gameActive = false;
 const totalNumbers = 30;
 
 startBtn.addEventListener('click', ()=>{
-  startBtn.disabled=true;
-  startCountdown(3);
+  startBtn.style.display='none';
+  countdown(3);
 });
 
-function startCountdown(sec){
-  targetArea.style.display='block';
-  targetArea.textContent = `Mulai dalam ${sec}...`;
+function countdown(sec){
+  countdownEl.style.display='block';
   let counter = sec;
+  countdownEl.textContent = counter;
   const interval = setInterval(()=>{
     counter--;
     if(counter>0){
-      targetArea.textContent = `Mulai dalam ${counter}...`;
+      countdownEl.textContent = counter;
     } else {
       clearInterval(interval);
-      targetArea.textContent = '';
-      startGame();
+      countdownEl.textContent = 'GO!';
+      setTimeout(()=>{ countdownEl.style.display='none'; startGame(); },500);
     }
   },1000);
 }
@@ -180,7 +183,7 @@ function resetGame(){
   scores=[0,0];
   score1El.textContent=0;
   score2El.textContent=0;
-  startBtn.disabled=false;
+  startBtn.style.display='block';
   targetArea.style.display='none';
   document.querySelector('.choices').style.display='none';
   gameArea.style.display='none';
