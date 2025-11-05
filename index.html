@@ -127,33 +127,31 @@ function newRound(){
   const numbers = Array.from({length:totalNumbers}, (_,i)=>i+1);
   const target = Math.floor(Math.random()*totalNumbers)+1;
   targetValue.textContent = target;
-  renderChoices(choicesP1, numbers, 0);
-  renderChoices(choicesP2, numbers, 1);
+
+  // Render pilihan di kedua sisi sama
+  renderChoices(choicesP1, numbers, target, 0);
+  renderChoices(choicesP2, numbers, target, 1);
 }
 
-function renderChoices(container, arr, player){
+function renderChoices(container, arr, target, player){
   container.innerHTML='';
   const shuffled = arr.slice().sort(()=>Math.random()-0.5);
   shuffled.forEach(num=>{
     const cell = document.createElement('div');
     cell.className='cell';
     cell.textContent=num;
-    cell.addEventListener('click',()=>checkAnswer(num, player));
+    cell.addEventListener('click',()=>{
+      if(!gameActive) return;
+      if(num===target){
+        addPoint(player);
+        newRound();
+      }
+    });
     container.appendChild(cell);
   });
 }
 
-function checkAnswer(num, player){
-  if(!gameActive) return;
-  const target = Number(targetValue.textContent);
-  if(num===target){
-    addPoint(player);
-    newRound();
-  }
-}
-
 function addPoint(player){
-  if(!gameActive) return;
   scores[player]+=10;
   moveRope(player);
   score1El.textContent = scores[0];
